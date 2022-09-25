@@ -63,3 +63,15 @@ class UserInfoView(APIView):
         serializer = UserInfoSerializer(user)
 
         return Response(data=serializer.data, status=status.HTTP_202_ACCEPTED)
+
+
+class UserLogoutView(APIView):
+    authentication_classes = [CustomAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        response = Response()
+        response.delete_cookie("jwt")
+        response.data = "logout success"
+        response.status_code = status.HTTP_204_NO_CONTENT
+        return response
