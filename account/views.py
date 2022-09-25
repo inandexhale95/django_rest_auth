@@ -2,17 +2,47 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from account.serializers import UserRegisterSerializer
+from django_rest_auth import settings
+
+from account import services
 from account.models import User
+from account.serializers import UserRegisterSerializer, UserLoginSerializer
+
+
+import datetime
+import jwt
 
 
 class UserRegisterView(APIView):
     def post(self, request):
-        register_serializer = UserRegisterSerializer(data=request.data)
-        register_serializer.is_valid(raise_exception=True)
+        serializer = UserRegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        register_serializer.instance = User.objects.create_user(
-            **register_serializer.data
-        )
+        serializer.instance = User.objects.create_user(**serializer.data)
 
         return Response(data="register success", status=status.HTTP_201_CREATED)
+
+
+class UserLoginView(APIView):
+    def post(self, request):
+        serializer = UserLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = services.get_user_email(**serializer.validated_data)
+
+        payload = dict(
+            id=user.id,
+            exp=datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+            iat=datetime.datetime.utcnow(),
+        )
+
+        token = jwt.encode(
+            payload=payload, key=settings.JWT_SECRET_KEY, algorithm="HS256"
+        )
+
+        response = Response()
+        response.set_cookie(key="jwt", value=token, httponly=True)
+        response.data = "Login success"
+        response.status_code = status.HTTP_200_OK
+
+        return response

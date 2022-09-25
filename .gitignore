@@ -3,3 +3,4 @@ migrations
 db.sqlite3
 .idea
 data.json
+settings.py

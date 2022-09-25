@@ -1,8 +1,5 @@
 from rest_framework import serializers
 
-from account.models import User
-from account.services import UserDataclass
-
 
 class UserRegisterSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -23,3 +20,8 @@ class UserRegisterSerializer(serializers.Serializer):
     #     data = super().to_internal_value(data)
     #
     #     return UserDataclass(**data)
+
+
+class UserLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(write_only=True)
