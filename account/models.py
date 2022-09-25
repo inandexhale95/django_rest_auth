@@ -24,6 +24,7 @@ class UserManager(BaseUserManager):
             username=username,
             company_name=company_name,
         )
+
         user.set_password(raw_password=password)
         user.is_active = True
         user.is_staff = is_staff
@@ -58,4 +59,4 @@ class User(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "company_name"]
 
-    objects = UserManager
+    objects = UserManager()
