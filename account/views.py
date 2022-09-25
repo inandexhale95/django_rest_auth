@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -6,8 +7,12 @@ from django_rest_auth import settings
 
 from account import services
 from account.models import User
-from account.serializers import UserRegisterSerializer, UserLoginSerializer
-
+from account.authentication import CustomAuthentication
+from account.serializers import (
+    UserRegisterSerializer,
+    UserLoginSerializer,
+    UserInfoSerializer,
+)
 
 import datetime
 import jwt
@@ -46,3 +51,15 @@ class UserLoginView(APIView):
         response.status_code = status.HTTP_200_OK
 
         return response
+
+
+class UserInfoView(APIView):
+    authentication_classes = [CustomAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        serializer = UserInfoSerializer(user)
+
+        return Response(data=serializer.data, status=status.HTTP_202_ACCEPTED)
